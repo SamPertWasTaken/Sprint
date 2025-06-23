@@ -4,9 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+config = "0.15.11"
 font-kit = { version = "0.14.3", features = ["freetype"] }
 freedesktop-desktop-entry = "0.7.13"
 meval = "0.2.0"
 pathfinder_geometry = "0.5.1"
+serde = "1.0.219"
 smithay-client-toolkit = "0.19.2"
 wayland-client = "0.31.10"

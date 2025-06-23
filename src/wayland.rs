@@ -5,7 +5,7 @@ use pathfinder_geometry::vector::Vector2I;
 use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_keyboard, delegate_layer, delegate_output, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{keyboard::{KeyboardHandler, Keysym}, Capability, SeatHandler, SeatState}, shell::{wlr_layer::{KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface}, WaylandSurface}, shm::{slot::SlotPool, Shm, ShmHandler}};
 use wayland_client::{globals::registry_queue_init, protocol::{wl_keyboard::WlKeyboard, wl_shm}, Connection, QueueHandle};
 
-use crate::{entry_box::{EntryBoxValue, Entrybox}, input_box::InputBox, render_canvas::{CanvasRenderable, Color, RenderCanvas}, results::{self, SprintResults}, text_label::TextLabel, FONT};
+use crate::{entry_box::{EntryBoxValue, Entrybox}, input_box::InputBox, render_canvas::{CanvasRenderable, Color, RenderCanvas}, results::{self, SprintResults}, sprint_config::SprintConfig, text_label::TextLabel};
 
 struct LayerState {
     registry_state: RegistryState,
@@ -22,12 +22,12 @@ struct LayerState {
     canvas: RenderCanvas,
 
     // App Data
+    config: SprintConfig,
     filter: String,
     filter_results: SprintResults,
     selected: u8,
 
     // Components
-    font_source: SystemSource,
     filter_input: InputBox,
     filter_results_cache: Vec<Entrybox>,
     no_results_label: TextLabel
@@ -194,14 +194,14 @@ impl LayerState {
         // Math
         self.filter_results_cache = Vec::new();
         if let Some(math) = self.filter_results.math_result {
-            let entry = Entrybox::new(EntryBoxValue::Math(math), transform, standard_size, &self.font_source);
+            let entry = Entrybox::new(EntryBoxValue::Math(math), transform, standard_size, self.config.font.clone());
             transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
             self.filter_results_cache.push(entry);
         }
 
         let mut count: u8 = 0;
         for desktop in &self.filter_results.desktop_results {
-            let entry = Entrybox::new(EntryBoxValue::Desktop(desktop.to_owned()), transform, standard_size, &self.font_source);
+            let entry = Entrybox::new(EntryBoxValue::Desktop(desktop.to_owned()), transform, standard_size, self.config.font.clone());
             transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
             self.filter_results_cache.push(entry);
             count += 1;
@@ -231,7 +231,7 @@ delegate_keyboard!(LayerState);
 delegate_layer!(LayerState);
 delegate_registry!(LayerState);
 
-pub fn create_layer() {
+pub fn create_layer(config: SprintConfig) {
     let conn = Connection::connect_to_env().expect("Unable to connect to a compositor.");
     let (globals, mut event_queue) = registry_queue_init(&conn).unwrap();
     let qh = event_queue.handle();
@@ -271,10 +271,10 @@ pub fn create_layer() {
         filter_results: results::return_results(""),
         selected: 0,
 
-        filter_input: InputBox::new("", "Search...", Vector2I::new(16, 8), Vector2I::new(996, 32), &font_source),
+        filter_input: InputBox::new("", "Search...", Vector2I::new(16, 8), Vector2I::new(996, 32), config.font.clone()),
         filter_results_cache: Vec::new(),
-        no_results_label: TextLabel::new("¯\\_(._.)_/¯", FONT, 18.0, Vector2I::new(462, 240), Vector2I::new(100, 32), &font_source).expect("Unable to create no results label."),
-        font_source
+        no_results_label: TextLabel::new("¯\\_(._.)_/¯", config.font.clone(), 18.0, Vector2I::new(462, 240), Vector2I::new(100, 32)).expect("Unable to create no results label."),
+        config
     };
     state.canvas.wipe(Color::new(25, 25, 25, 255));
     state.recreate_results_cache();

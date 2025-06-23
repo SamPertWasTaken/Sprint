@@ -1,10 +1,10 @@
 use std::process::{Command, Stdio};
 
-use font_kit::source::SystemSource;
+use font_kit::font::Font;
 use freedesktop_desktop_entry::{get_languages_from_env, DesktopEntry};
 use pathfinder_geometry::vector::Vector2I;
 
-use crate::{render_canvas::CanvasRenderable, text_label::TextLabel, FONT};
+use crate::{render_canvas::CanvasRenderable, text_label::TextLabel};
 
 #[derive(Debug)]
 pub enum EntryBoxValue {
@@ -21,7 +21,7 @@ pub struct Entrybox {
 }
 
 impl Entrybox {
-    pub fn new(value: EntryBoxValue, position: Vector2I, size: Vector2I, font_source: &SystemSource) -> Self {
+    pub fn new(value: EntryBoxValue, position: Vector2I, size: Vector2I, font: Font) -> Self {
         let locales = get_languages_from_env();
         let label = match value {
             EntryBoxValue::Desktop(ref desktop_entry) => desktop_entry.full_name(&locales).expect("Failed to get desktop name").to_string(),
@@ -31,7 +31,7 @@ impl Entrybox {
             value,
             position,
             size,
-            label: TextLabel::new(&label, FONT, 16.0, position, size, font_source).expect("Failed to make text label.")
+            label: TextLabel::new(&label, font, 16.0, position, size).expect("Failed to make text label.")
         }
     }
 

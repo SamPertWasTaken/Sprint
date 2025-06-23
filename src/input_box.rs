@@ -1,9 +1,9 @@
 use std::cmp::{max, min};
 
-use font_kit::source::SystemSource;
+use font_kit::font::Font;
 use pathfinder_geometry::vector::Vector2I;
 
-use crate::{render_canvas::{CanvasRenderable, Color}, text_label::TextLabel, FONT};
+use crate::{render_canvas::{CanvasRenderable, Color}, text_label::TextLabel};
 
 pub struct InputBox {
     position: Vector2I,
@@ -17,15 +17,15 @@ pub struct InputBox {
 }
 
 impl InputBox {
-    pub fn new(starting_text: &str, placeholder: &str, position: Vector2I, size: Vector2I, font_source: &SystemSource) -> Self {
+    pub fn new(starting_text: &str, placeholder: &str, position: Vector2I, size: Vector2I, font: Font) -> Self {
         Self {
             position,
             size,
             placeholder: placeholder.to_string(),
             text: starting_text.to_string(),
             cursor_pos: 0,
-            label: TextLabel::new(starting_text, FONT, 18.0, position, size, font_source).expect("Failed to create input box label."),
-            placeholder_label: TextLabel::new(placeholder, FONT, 18.0, position, size, font_source).expect("Failed to create input box placeholder label.")
+            label: TextLabel::new(starting_text, font.clone(), 18.0, position, size).expect("Failed to create input box label."),
+            placeholder_label: TextLabel::new(placeholder, font.clone(), 18.0, position, size).expect("Failed to create input box placeholder label.")
         }
     }
 

@@ -18,17 +18,14 @@ pub struct TextLabel {
 }
 
 impl TextLabel {
-    pub fn new(text: &str, font: &str, font_size: f32, position: Vector2I, size: Vector2I, source: &SystemSource) -> Option<Self> {
-        let font = Self::find_font(source, font);
-        font.as_ref()?;
-
+    pub fn new(text: &str, font: Font, font_size: f32, position: Vector2I, size: Vector2I) -> Option<Self> {
         Some(Self {
             position,
             size,
             font_canvas: None,
             requires_rerender: true, // triggers the first render
             text: text.to_string(),
-            font: font.unwrap(),
+            font,
             font_size,
             character_length_cache: HashMap::new()
         })
