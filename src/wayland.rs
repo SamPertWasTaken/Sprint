@@ -273,7 +273,7 @@ pub fn create_layer() {
 
         filter_input: InputBox::new("", "Search...", Vector2I::new(16, 8), Vector2I::new(996, 32), &font_source),
         filter_results_cache: Vec::new(),
-        no_results_label: TextLabel::new("¯\\_(;-;)_/¯", FONT, 18.0, Vector2I::new(1024 / 2, 512 / 2), Vector2I::new(100, 32), &font_source).expect("Unable to create no results label."),
+        no_results_label: TextLabel::new("¯\\_(._.)_/¯", FONT, 18.0, Vector2I::new(462, 240), Vector2I::new(100, 32), &font_source).expect("Unable to create no results label."),
         font_source
     };
     state.canvas.wipe(Color::new(25, 25, 25, 255));
