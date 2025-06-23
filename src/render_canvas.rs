@@ -28,7 +28,6 @@ impl Color {
 
 pub struct RenderCanvas {
     pixels: Vec<Color>,
-    components: HashMap<String, Box<dyn CanvasRenderable>>,
     width: u32,
     height: u32
 }
@@ -36,7 +35,6 @@ impl RenderCanvas {
     pub fn new(width: u32, height: u32) -> Self {
         Self {
             pixels: vec![Color::new(0, 0, 0, 255); (width * height) as usize],
-            components: HashMap::new(),
             width,
             height
         }
