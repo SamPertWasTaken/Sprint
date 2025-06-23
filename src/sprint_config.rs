@@ -4,14 +4,24 @@ use config::{Config, File};
 use font_kit::{font::Font, source::SystemSource};
 use serde::Deserialize;
 
+use crate::render_canvas::Color;
+
 #[derive(Debug, Deserialize)]
 struct SprintConfigRaw {
     font: String,
+    background_color: (u8, u8, u8),
+    foreground_color: (u8, u8, u8),
+    seperator_color: (u8, u8, u8),
+    selection_hover_color: (u8, u8, u8)
 }
 impl Default for SprintConfigRaw {
     fn default() -> Self {
         Self {
-            font: "FreeSans".to_string()
+            font: "FreeSans".to_string(),
+            background_color: (25, 25, 25),
+            foreground_color: (30, 30, 30),
+            seperator_color: (112, 69, 156),
+            selection_hover_color: (72, 43, 102)
         }
     }
 }
@@ -55,7 +65,11 @@ pub struct SprintConfig {
     // TODO: Currently fonts have to be cloned due to it not impling copy, is there a way around
     // this? Got close with Cow's but tainting every struct with a lifetime seems
     // counter-productive
-    pub font: Font
+    pub font: Font,
+    pub background_color: Color,
+    pub foreground_color: Color,
+    pub seperator_color: Color,
+    pub selection_hover_color: Color
 }
 impl SprintConfig {
     pub fn load() -> Self {
@@ -67,8 +81,13 @@ impl SprintConfig {
         let font = font_handle.load().expect("Failed to load font.");
 
         Self {
-            raw: raw_config,
-            font
+            font,
+            background_color: Color::from_tuple(raw_config.background_color, 255),
+            foreground_color: Color::from_tuple(raw_config.foreground_color, 255),
+            seperator_color: Color::from_tuple(raw_config.seperator_color, 255),
+            selection_hover_color: Color::from_tuple(raw_config.selection_hover_color, 255),
+
+            raw: raw_config
         }
     }
 }

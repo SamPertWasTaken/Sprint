@@ -21,6 +21,10 @@ impl Color {
             a
         }
     }
+    pub fn from_tuple(tuple: (u8, u8, u8), a: u8) -> Self {
+        Self::new(tuple.0, tuple.1, tuple.2, a)
+    }
+
     pub fn get_wayland_color(&self) -> i32 {
         ((self.a as i32) << 24) + ((self.r as i32) << 16) + ((self.g as i32) << 8) + (self.b as i32)
     }

@@ -158,19 +158,19 @@ impl LayerState {
 
         let (buffer, canvas) = self.pool.create_buffer(width as i32, height as i32, stride, wl_shm::Format::Argb8888).expect("Failed to create buffer on draw.");
 
-        self.canvas.wipe(Color::new(25, 25, 25, 255));
+        self.canvas.wipe(self.config.background_color);
 
         // Call your component draw calls here, in order you want them to display
-        self.canvas.draw_box(0, 0, 1024, 48, Color::new(30, 30, 30, 255));
+        self.canvas.draw_box(0, 0, 1024, 48, self.config.foreground_color);
         self.filter_input.draw(&mut self.canvas);
 
         let selected_height = HEIGHT_PER_ELEMENT * self.selected as i32;
         if !self.filter_results_cache.is_empty() {
-            self.canvas.draw_box(0, (49 + selected_height) as u32, 1024, HEIGHT_PER_ELEMENT as u32, Color::new(72, 43, 102, 255));
+            self.canvas.draw_box(0, (49 + selected_height) as u32, 1024, HEIGHT_PER_ELEMENT as u32, self.config.selection_hover_color);
         } else {
             self.no_results_label.draw(&mut self.canvas);
         }
-        self.canvas.draw_box(0, 49, 1024, 1, Color::new(112, 69, 156, 255));
+        self.canvas.draw_box(0, 49, 1024, 1, self.config.seperator_color);
 
         for x in &mut self.filter_results_cache {
             x.draw(&mut self.canvas);
