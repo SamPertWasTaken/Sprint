@@ -10,6 +10,7 @@ use crate::{render_canvas::CanvasRenderable, text_label::TextLabel};
 pub enum EntryBoxValue {
     Desktop(DesktopEntry),
     Math(f64),
+    WebSearch(String, String),
 }
 
 #[derive(Debug)]
@@ -25,7 +26,8 @@ impl Entrybox {
         let locales = get_languages_from_env();
         let label = match value {
             EntryBoxValue::Desktop(ref desktop_entry) => desktop_entry.full_name(&locales).expect("Failed to get desktop name").to_string(),
-            EntryBoxValue::Math(math) => format!("= {}", math.to_string()),
+            EntryBoxValue::Math(math) => format!("= {math}"),
+            EntryBoxValue::WebSearch(ref query, _) => format!("Search \"{query}\" on the web...")
         };
         Self {
             value,
@@ -54,7 +56,8 @@ impl Entrybox {
                     .spawn()
                     .expect("Unable to launch process");
             },
-            EntryBoxValue::Math(math) => {},
+            EntryBoxValue::Math(_) => {},
+            EntryBoxValue::WebSearch(_, url) => webbrowser::open(url).expect("Failed to launch url on web browser."),
         }
     }
 }

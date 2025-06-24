@@ -127,7 +127,7 @@ impl KeyboardHandler for LayerState {
         }
 
         // re-do results 
-        self.filter_results = results::return_results(&self.filter);
+        self.filter_results = results::return_results(&self.filter, &self.config);
         self.recreate_results_cache();
     }
 
@@ -199,6 +199,7 @@ impl LayerState {
             self.filter_results_cache.push(entry);
         }
 
+        // Desktop
         let mut count: u8 = 0;
         for desktop in &self.filter_results.desktop_results {
             let entry = Entrybox::new(EntryBoxValue::Desktop(desktop.to_owned()), transform, standard_size, self.config.font.clone());
@@ -209,6 +210,11 @@ impl LayerState {
                 break;
             }
         }
+
+        // Web 
+        let web_entry = Entrybox::new(EntryBoxValue::WebSearch(self.filter_results.web_results.0.to_string(), self.filter_results.web_results.1.to_string()), transform, standard_size, self.config.font.clone());
+        transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
+        self.filter_results_cache.push(web_entry);
 
         println!("Time to recreate results element cache: {:?}", Instant::now() - time);
     }
@@ -268,7 +274,7 @@ pub fn create_layer(config: SprintConfig) {
         height,
 
         filter: String::new(),
-        filter_results: results::return_results(""),
+        filter_results: results::return_results("", &config),
         selected: 0,
 
         filter_input: InputBox::new("", "Search...", Vector2I::new(16, 8), Vector2I::new(996, 32), config.font.clone()),

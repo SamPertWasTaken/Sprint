@@ -6,11 +6,14 @@
 use std::time::Instant;
 use freedesktop_desktop_entry::{default_paths, get_languages_from_env, DesktopEntry, Iter};
 
-pub fn return_results(input: &str) -> SprintResults {
+use crate::sprint_config::SprintConfig;
+
+pub fn return_results(input: &str, config: &SprintConfig) -> SprintResults {
     let time: Instant = Instant::now();
     let results = SprintResults {
         math_result: math(input),
-        desktop_results: desktop_entries(input)
+        desktop_results: desktop_entries(input),
+        web_results: web(input, config)
     };
     println!("Results search time for '{input}': {:?}", Instant::now() - time);
     results
@@ -21,6 +24,11 @@ fn math(input: &str) -> Option<f64> {
         return Some(r);
     }
     None
+}
+
+fn web(input: &str, config: &SprintConfig) -> (String, String) {
+    // config.search_template.replace("%%QUERY%%", &input.replace(" ", "+"))
+    (input.to_string(), config.search_template.replace("%%QUERY%%", &input.replace(" ", "+")))
 }
 
 fn desktop_entries(input: &str) -> Vec<DesktopEntry> {
@@ -37,5 +45,6 @@ fn desktop_entries(input: &str) -> Vec<DesktopEntry> {
 #[derive(Default, Debug)]
 pub struct SprintResults {
     pub math_result: Option<f64>,
-    pub desktop_results: Vec<DesktopEntry>
+    pub desktop_results: Vec<DesktopEntry>,
+    pub web_results: (String, String)
 }

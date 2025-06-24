@@ -13,3 +13,4 @@ pathfinder_geometry = "0.5.1"
 serde = "1.0.219"
 smithay-client-toolkit = "0.19.2"
 wayland-client = "0.31.10"
+webbrowser = { version = "1.0.5", features = ["hardened"] }
