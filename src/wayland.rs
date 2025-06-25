@@ -190,31 +190,38 @@ impl LayerState {
         let time: Instant = Instant::now();
         let mut transform = Vector2I::new(16, 49);
         let standard_size = Vector2I::new(1024, HEIGHT_PER_ELEMENT);
-
-        // Math
         self.filter_results_cache = Vec::new();
-        if let Some(math) = self.filter_results.math_result {
-            let entry = Entrybox::new(EntryBoxValue::Math(math), transform, standard_size, self.config.font.clone());
-            transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
-            self.filter_results_cache.push(entry);
-        }
 
-        // Desktop
-        let mut count: u8 = 0;
-        for desktop in &self.filter_results.desktop_results {
-            let entry = Entrybox::new(EntryBoxValue::Desktop(desktop.to_owned()), transform, standard_size, self.config.font.clone());
-            transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
-            self.filter_results_cache.push(entry);
-            count += 1;
-            if count >= ELEMENT_LIMIT {
-                break;
+        for result_type in &self.config.result_order {
+            match result_type.to_lowercase().as_str() {
+                "math" => {
+                    if let Some(math) = self.filter_results.math_result {
+                        let entry = Entrybox::new(EntryBoxValue::Math(math), transform, standard_size, self.config.font.clone());
+                        transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
+                        self.filter_results_cache.push(entry);
+                    }
+                },
+                "desktop" => {
+                    let mut count: u8 = 0;
+                    for desktop in &self.filter_results.desktop_results {
+                        let entry = Entrybox::new(EntryBoxValue::Desktop(desktop.to_owned()), transform, standard_size, self.config.font.clone());
+                        transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
+                        self.filter_results_cache.push(entry);
+                        count += 1;
+                        if count >= ELEMENT_LIMIT {
+                            break;
+                        }
+                    }
+                },
+                "search" => {
+                    let web_entry = Entrybox::new(EntryBoxValue::WebSearch(self.filter_results.web_results.0.to_string(), self.filter_results.web_results.1.to_string()), transform, standard_size, self.config.font.clone());
+                    transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
+                    self.filter_results_cache.push(web_entry);
+
+                },
+                _ => { println!("Error: Unknown result type {}", result_type) }
             }
         }
-
-        // Web 
-        let web_entry = Entrybox::new(EntryBoxValue::WebSearch(self.filter_results.web_results.0.to_string(), self.filter_results.web_results.1.to_string()), transform, standard_size, self.config.font.clone());
-        transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
-        self.filter_results_cache.push(web_entry);
 
         println!("Time to recreate results element cache: {:?}", Instant::now() - time);
     }

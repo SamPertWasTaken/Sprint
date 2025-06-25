@@ -13,7 +13,8 @@ struct SprintConfigRaw {
     foreground_color: (u8, u8, u8),
     seperator_color: (u8, u8, u8),
     selection_hover_color: (u8, u8, u8),
-    search_template: String
+    search_template: String,
+    result_order: Vec<String>
 }
 impl Default for SprintConfigRaw {
     fn default() -> Self {
@@ -23,7 +24,8 @@ impl Default for SprintConfigRaw {
             foreground_color: (30, 30, 30),
             seperator_color: (112, 69, 156),
             selection_hover_color: (72, 43, 102),
-            search_template: "https://duckduckgo.com/?q=%%QUERY%%".to_string()
+            search_template: "https://duckduckgo.com/?q=%%QUERY%%".to_string(),
+            result_order: vec!["math".to_string(), "desktop".to_string(), "search".to_string()]
         }
     }
 }
@@ -72,7 +74,8 @@ pub struct SprintConfig {
     pub foreground_color: Color,
     pub seperator_color: Color,
     pub selection_hover_color: Color,
-    pub search_template: String
+    pub search_template: String,
+    pub result_order: Vec<String>
 }
 impl SprintConfig {
     pub fn load() -> Self {
@@ -90,6 +93,7 @@ impl SprintConfig {
             seperator_color: Color::from_tuple(raw_config.seperator_color, 255),
             selection_hover_color: Color::from_tuple(raw_config.selection_hover_color, 255),
             search_template: raw_config.search_template.to_string(),
+            result_order: raw_config.result_order.clone(),
 
             raw: raw_config
         }
