@@ -194,6 +194,13 @@ impl LayerState {
 
         for result_type in &self.config.result_order {
             match result_type.to_lowercase().as_str() {
+                "prefixes" => {
+                    if let Some(prefix) = &self.filter_results.prefix_results {
+                        let prefix_entry = Entrybox::new(EntryBoxValue::WebPrefix(prefix.0.to_string(), prefix.1.to_string(), prefix.2.to_string()), transform, standard_size, self.config.font.clone());
+                        transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
+                        self.filter_results_cache.push(prefix_entry);
+                    }
+                },
                 "math" => {
                     if let Some(math) = self.filter_results.math_result {
                         let entry = Entrybox::new(EntryBoxValue::Math(math), transform, standard_size, self.config.font.clone());
@@ -217,7 +224,6 @@ impl LayerState {
                     let web_entry = Entrybox::new(EntryBoxValue::WebSearch(self.filter_results.web_results.0.to_string(), self.filter_results.web_results.1.to_string()), transform, standard_size, self.config.font.clone());
                     transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
                     self.filter_results_cache.push(web_entry);
-
                 },
                 _ => { println!("Error: Unknown result type {}", result_type) }
             }

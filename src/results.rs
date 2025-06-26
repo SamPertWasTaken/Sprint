@@ -11,12 +11,33 @@ use crate::sprint_config::SprintConfig;
 pub fn return_results(input: &str, config: &SprintConfig) -> SprintResults {
     let time: Instant = Instant::now();
     let results = SprintResults {
+        prefix_results: web_prefixes(input, config),
         math_result: math(input),
         desktop_results: desktop_entries(input),
         web_results: web(input, config)
     };
     println!("Results search time for '{input}': {:?}", Instant::now() - time);
     results
+}
+
+fn web_prefixes(input: &str, config: &SprintConfig) -> Option<(String, String, String)> {
+    // config.search_template.replace("%%QUERY%%", &input.replace(" ", "+"))
+    // (input.to_string(), config.search_template.replace("%%QUERY%%", &input.replace(" ", "+")))
+    let mut result: Option<(String, String, String)> = None;
+    for prefix in &config.web_prefixes {
+        if let Some(query) = input.strip_prefix(&prefix.1) {
+            if result.is_some() {
+                // too many matches
+                return None;
+            }
+            let mut prefix = prefix.clone();
+            prefix.1 = query.trim().to_string();
+            prefix.2 = prefix.2.replace("%%QUERY%%", &query.trim().replace(" ", "+"));
+            result = Some(prefix.clone());
+        }
+    }
+
+    result
 }
 
 fn math(input: &str) -> Option<f64> {
@@ -44,6 +65,7 @@ fn desktop_entries(input: &str) -> Vec<DesktopEntry> {
 
 #[derive(Default, Debug)]
 pub struct SprintResults {
+    pub prefix_results: Option<(String, String, String)>,
     pub math_result: Option<f64>,
     pub desktop_results: Vec<DesktopEntry>,
     pub web_results: (String, String)

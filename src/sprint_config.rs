@@ -14,6 +14,7 @@ struct SprintConfigRaw {
     seperator_color: (u8, u8, u8),
     selection_hover_color: (u8, u8, u8),
     search_template: String,
+    web_prefixes: Vec<(String, String, String)>,
     result_order: Vec<String>
 }
 impl Default for SprintConfigRaw {
@@ -25,7 +26,12 @@ impl Default for SprintConfigRaw {
             seperator_color: (112, 69, 156),
             selection_hover_color: (72, 43, 102),
             search_template: "https://duckduckgo.com/?q=%%QUERY%%".to_string(),
-            result_order: vec!["math".to_string(), "desktop".to_string(), "search".to_string()]
+            web_prefixes: vec![
+                ("Youtube".to_string(), "!yt".to_string(), "https://www.youtube.com/results?search_query=%%QUERY%%".to_string()),
+                ("Wikipedia".to_string(), "!wiki".to_string(), "https://en.wikipedia.org/w/index.php?search=%%QUERY%%".to_string()),
+                ("Arch Wiki".to_string(), "!arwiki".to_string(), "https://wiki.archlinux.org/index.php?search=%%QUERY%%".to_string())
+            ],
+            result_order: vec!["prefixes".to_string(), "math".to_string(), "desktop".to_string(), "search".to_string()]
         }
     }
 }
@@ -75,6 +81,7 @@ pub struct SprintConfig {
     pub seperator_color: Color,
     pub selection_hover_color: Color,
     pub search_template: String,
+    pub web_prefixes: Vec<(String, String, String)>,
     pub result_order: Vec<String>
 }
 impl SprintConfig {
@@ -93,6 +100,7 @@ impl SprintConfig {
             seperator_color: Color::from_tuple(raw_config.seperator_color, 255),
             selection_hover_color: Color::from_tuple(raw_config.selection_hover_color, 255),
             search_template: raw_config.search_template.to_string(),
+            web_prefixes: raw_config.web_prefixes.clone(),
             result_order: raw_config.result_order.clone(),
 
             raw: raw_config

@@ -11,6 +11,7 @@ pub enum EntryBoxValue {
     Desktop(DesktopEntry),
     Math(f64),
     WebSearch(String, String),
+    WebPrefix(String, String, String),
 }
 
 #[derive(Debug)]
@@ -27,7 +28,8 @@ impl Entrybox {
         let label = match value {
             EntryBoxValue::Desktop(ref desktop_entry) => desktop_entry.full_name(&locales).expect("Failed to get desktop name").to_string(),
             EntryBoxValue::Math(math) => format!("= {math}"),
-            EntryBoxValue::WebSearch(ref query, _) => format!("Search \"{query}\" on the web...")
+            EntryBoxValue::WebSearch(ref query, _) => format!("Search \"{query}\" on the web..."),
+            EntryBoxValue::WebPrefix(ref name, ref query, _) => format!("Search \"{query}\" on \"{name}\"...")
         };
         Self {
             value,
@@ -58,6 +60,7 @@ impl Entrybox {
             },
             EntryBoxValue::Math(_) => {},
             EntryBoxValue::WebSearch(_, url) => webbrowser::open(url).expect("Failed to launch url on web browser."),
+            EntryBoxValue::WebPrefix(_, _, url) => webbrowser::open(url).expect("Failed to launch url on web browser."),
         }
     }
 }
