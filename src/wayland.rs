@@ -127,8 +127,10 @@ impl KeyboardHandler for LayerState {
         }
 
         // re-do results 
-        self.filter_results = results::return_results(&self.filter, &self.config);
-        self.recreate_results_cache();
+        if !self.filter.trim().is_empty() {
+            self.filter_results = results::return_results(&self.filter, &self.config);
+            self.recreate_results_cache();
+        }
     }
 
     fn update_modifiers(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _serial: u32, _modifiers: smithay_client_toolkit::seat::keyboard::Modifiers, _layout: u32) {}
