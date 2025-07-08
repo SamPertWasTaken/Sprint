@@ -94,42 +94,28 @@ impl SeatHandler for LayerState {
 
 impl KeyboardHandler for LayerState {
     fn press_key(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _serial: u32, event: smithay_client_toolkit::seat::keyboard::KeyEvent) {
-        if event.keysym == Keysym::Escape {
-            self.close = true;
-            return;
-        }
-        if event.keysym == Keysym::Return {
-            self.select();
-            return;
-        }
-
-        if event.keysym == Keysym::Down {
-            self.selected = min((self.filter_results_cache.len() - 1) as u8, self.selected + 1);
-        }
-        if event.keysym == Keysym::Up {
-            self.selected = if self.selected > 0 { self.selected - 1 } else { 0 };
-            return;
-        }
-        if event.keysym == Keysym::Right {
-            self.filter_input.advance_cursor();
-        }
-        if event.keysym == Keysym::Left {
-            self.filter_input.reel_cursor();
-        }
-
-        if event.keysym == Keysym::BackSpace {
-            if let Some(new_filter) = self.filter_input.pop_at_cursor() {
-                self.filter = new_filter;
+        match event.keysym {
+            // Control characters
+            Keysym::Escape => self.close = true,
+            Keysym::Return => self.select(),
+            Keysym::BackSpace => if let Some(new_filter) = self.filter_input.pop_at_cursor() { self.filter = new_filter }
+            // Cursor movement
+            Keysym::Down => self.selected = min((self.filter_results_cache.len() - 1) as u8, self.selected + 1),
+            Keysym::Up => self.selected = if self.selected > 0 { self.selected - 1 } else { 0 },
+            Keysym::Right => self.filter_input.advance_cursor(),
+            Keysym::Left => self.filter_input.reel_cursor(),
+            
+            _ => {
+                if let Some(character) = event.keysym.key_char() {
+                    let new_filter = self.filter_input.push_at_cursor(character);
+                    self.filter = new_filter;
+                }
+                // re-do results 
+                if !self.filter.trim().is_empty() {
+                    self.filter_results = results::return_results(&self.filter, &self.config);
+                    self.recreate_results_cache();
+                }
             }
-        } else if let Some(character) = event.keysym.key_char() {
-            let new_filter = self.filter_input.push_at_cursor(character);
-            self.filter = new_filter;
-        }
-
-        // re-do results 
-        if !self.filter.trim().is_empty() {
-            self.filter_results = results::return_results(&self.filter, &self.config);
-            self.recreate_results_cache();
         }
     }
 
