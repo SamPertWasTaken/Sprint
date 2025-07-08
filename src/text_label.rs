@@ -60,6 +60,7 @@ impl TextLabel {
                 // transform and move on 
                 transform = transform.translate(Vector2F::new(8.0, 0.0));
                 self.character_length_cache.entry(' ').or_insert(RectI::new(Vector2I::new(0, 0), Vector2I::new(8, 0)));
+                continue;
             }
 
             let mut glyph_id = 0; // unknown glyph
@@ -67,7 +68,7 @@ impl TextLabel {
                 glyph_id = found_id;
             }
             // find the bounds so we can transform the next char correctly
-            let bounds = self.font.raster_bounds(glyph_id, self.font_size, transform, HintingOptions::None, RasterizationOptions::Bilevel).unwrap();
+            let bounds = self.font.raster_bounds(glyph_id, self.font_size, transform, HintingOptions::None, RasterizationOptions::GrayscaleAa).unwrap();
             self.character_length_cache.entry(char).or_insert(bounds);
             // actually render it to the canvas
             self.font.rasterize_glyph(canvas, glyph_id, self.font_size, transform, HintingOptions::None, RasterizationOptions::GrayscaleAa).unwrap();
