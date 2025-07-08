@@ -104,6 +104,8 @@ impl KeyboardHandler for LayerState {
             Keysym::Up => self.selected = if self.selected > 0 { self.selected - 1 } else { 0 },
             Keysym::Right => self.filter_input.advance_cursor(),
             Keysym::Left => self.filter_input.reel_cursor(),
+            Keysym::Home => self.filter_input.set_cursor_to_home(),
+            Keysym::End => self.filter_input.set_cursor_to_end(),
             
             _ => {
                 if let Some(character) = event.keysym.key_char() {

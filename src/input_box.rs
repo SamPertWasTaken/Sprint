@@ -38,6 +38,12 @@ impl InputBox {
     pub fn reel_cursor(&mut self) {
         self.set_cursor_pos(self.cursor_pos - 1);
     }
+    pub fn set_cursor_to_home(&mut self) {
+        self.set_cursor_pos(0);
+    }
+    pub fn set_cursor_to_end(&mut self) {
+        self.set_cursor_pos(self.text.chars().count());
+    }
 
     pub fn set_text(&mut self, new_text: &str) {
         self.text = new_text.to_string();
