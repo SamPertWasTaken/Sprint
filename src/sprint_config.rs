@@ -27,9 +27,9 @@ impl Default for SprintConfigRaw {
             selection_hover_color: (72, 43, 102),
             search_template: "https://duckduckgo.com/?q=%%QUERY%%".to_string(),
             web_prefixes: vec![
-                ("Youtube".to_string(), "!yt".to_string(), "https://www.youtube.com/results?search_query=%%QUERY%%".to_string()),
-                ("Wikipedia".to_string(), "!wiki".to_string(), "https://en.wikipedia.org/w/index.php?search=%%QUERY%%".to_string()),
-                ("Arch Wiki".to_string(), "!arwiki".to_string(), "https://wiki.archlinux.org/index.php?search=%%QUERY%%".to_string())
+                ("Youtube".to_string(), ">yt".to_string(), "https://www.youtube.com/results?search_query=%%QUERY%%".to_string()),
+                ("Wikipedia".to_string(), ">wiki".to_string(), "https://en.wikipedia.org/w/index.php?search=%%QUERY%%".to_string()),
+                ("Arch Wiki".to_string(), ">arwiki".to_string(), "https://wiki.archlinux.org/index.php?search=%%QUERY%%".to_string())
             ],
             result_order: vec!["prefixes".to_string(), "math".to_string(), "desktop".to_string(), "search".to_string()]
         }

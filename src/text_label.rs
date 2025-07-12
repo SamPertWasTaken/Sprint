@@ -68,6 +68,8 @@ impl TextLabel {
                 glyph_id = found_id;
             }
             // find the bounds so we can transform the next char correctly
+            // BUG: this fails with some characters, i believe this is a font kit issue?
+            // https://github.com/servo/font-kit/issues/253
             let bounds = self.font.raster_bounds(glyph_id, self.font_size, transform, HintingOptions::None, RasterizationOptions::GrayscaleAa).unwrap();
             self.character_length_cache.entry(char).or_insert(bounds);
             // actually render it to the canvas
