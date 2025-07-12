@@ -8,7 +8,7 @@ use crate::render_canvas::Color;
 
 const DEFAULT_CONFIG_CONTENTS: &str = include_str!("../default-config.toml");
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 struct SprintConfigRaw {
     font: String,
     background_color: (u8, u8, u8),
@@ -97,7 +97,7 @@ impl SprintConfigRaw {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SprintConfig {
     raw: SprintConfigRaw,
     // TODO: Currently fonts have to be cloned due to it not impling copy, is there a way around

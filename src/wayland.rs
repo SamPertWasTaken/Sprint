@@ -116,7 +116,7 @@ impl KeyboardHandler for LayerState {
         }
         // re-do results 
         if !self.filter.trim().is_empty() {
-            self.filter_results = results::return_results(&self.filter, &self.config);
+            self.filter_results.refresh_results(&self.filter, &self.config);
             self.recreate_results_cache();
         }
     }
@@ -211,7 +211,7 @@ impl LayerState {
                     }
                 },
                 "search" => {
-                    let web_entry = Entrybox::new(EntryBoxValue::WebSearch(self.filter_results.web_results.0.to_string(), self.filter_results.web_results.1.to_string()), transform, standard_size, self.config.font.clone());
+                    let web_entry = Entrybox::new(EntryBoxValue::WebSearch(self.filter_results.web_result.0.to_string(), self.filter_results.web_result.1.to_string()), transform, standard_size, self.config.font.clone());
                     transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
                     self.filter_results_cache.push(web_entry);
                 },
@@ -277,7 +277,7 @@ pub fn create_layer(config: SprintConfig) {
         height,
 
         filter: String::new(),
-        filter_results: results::return_results("", &config),
+        filter_results: SprintResults::new(),
         selected: 0,
 
         filter_input: InputBox::new("", "Search...", Vector2I::new(16, 8), Vector2I::new(996, 32), config.font.clone()),
@@ -285,6 +285,7 @@ pub fn create_layer(config: SprintConfig) {
         no_results_label: TextLabel::new("¯\\_(._.)_/¯", config.font.clone(), 18.0, Vector2I::new(462, 240), Vector2I::new(100, 32)).expect("Unable to create no results label."),
         config
     };
+    state.filter_results.refresh_results("", &state.config);
     state.canvas.wipe(Color::new(25, 25, 25, 255));
     state.recreate_results_cache();
 
