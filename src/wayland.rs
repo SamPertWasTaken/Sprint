@@ -112,12 +112,12 @@ impl KeyboardHandler for LayerState {
                     let new_filter = self.filter_input.push_at_cursor(character);
                     self.filter = new_filter;
                 }
-                // re-do results 
-                if !self.filter.trim().is_empty() {
-                    self.filter_results = results::return_results(&self.filter, &self.config);
-                    self.recreate_results_cache();
-                }
             }
+        }
+        // re-do results 
+        if !self.filter.trim().is_empty() {
+            self.filter_results = results::return_results(&self.filter, &self.config);
+            self.recreate_results_cache();
         }
     }
 
