@@ -4,7 +4,7 @@
 //! - Calculations
 
 use std::time::Instant;
-use freedesktop_desktop_entry::{default_paths, get_languages_from_env, DesktopEntry, Iter};
+use freedesktop_desktop_entry::{current_desktop, default_paths, get_languages_from_env, DesktopEntry, Iter};
 
 use crate::sprint_config::SprintConfig;
 
@@ -51,11 +51,26 @@ fn web(input: &str, config: &SprintConfig) -> (String, String) {
 
 fn desktop_entries(input: &str) -> Vec<DesktopEntry> {
     let locales = get_languages_from_env();
+    let current_desktop = current_desktop().expect("Failed to find the current desktop.");
 
     let mut entries = Iter::new(default_paths())
         .entries(Some(&locales))
-        .filter(|x| x.full_name(&locales).unwrap().to_lowercase().contains(&input.to_lowercase()))
+        .filter(|entry| entry.full_name(&locales).unwrap().to_lowercase().contains(&input.to_lowercase()))
+        .filter(|entry| !entry.no_display())
+        .filter(|entry| {
+            if let Some(show_in) = entry.only_show_in() {
+                return show_in.iter().any(|x| current_desktop.contains(&x.to_string()));
+            }
+            true
+        })
+        .filter(|entry| {
+            if let Some(no_show_in) = entry.not_show_in() {
+                return !no_show_in.iter().any(|x| current_desktop.contains(&x.to_string()));
+            }
+            true
+        })
         .collect::<Vec<_>>();
+    
     entries.sort_unstable_by_key(|item| item.full_name(&locales).expect("Failed to fetch app name from locale.").to_string());
     entries
 }
