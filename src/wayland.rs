@@ -5,7 +5,7 @@ use pathfinder_geometry::vector::Vector2I;
 use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_keyboard, delegate_layer, delegate_output, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{keyboard::{KeyboardHandler, Keysym}, Capability, SeatHandler, SeatState}, shell::{wlr_layer::{KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface}, WaylandSurface}, shm::{slot::SlotPool, Shm, ShmHandler}};
 use wayland_client::{globals::registry_queue_init, protocol::{wl_keyboard::WlKeyboard, wl_shm}, Connection, QueueHandle};
 
-use crate::{entry_box::{EntryBoxValue, Entrybox}, input_box::InputBox, render_canvas::{CanvasRenderable, Color, RenderCanvas}, results::{self, SprintResults}, sprint_config::SprintConfig, text_label::TextLabel};
+use crate::{entry_box::{EntryBoxValue, Entrybox}, input_box::InputBox, render_canvas::{CanvasRenderable, Color, RenderCanvas}, results::SprintResults, sprint_config::SprintConfig, text_label::TextLabel};
 
 struct LayerState {
     registry_state: RegistryState,

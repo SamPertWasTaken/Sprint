@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 #[derive(Clone, Copy, Debug)]
 pub struct Color {
     pub r: u8,
