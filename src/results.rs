@@ -21,8 +21,6 @@ pub fn return_results(input: &str, config: &SprintConfig) -> SprintResults {
 }
 
 fn web_prefixes(input: &str, config: &SprintConfig) -> Option<(String, String, String)> {
-    // config.search_template.replace("%%QUERY%%", &input.replace(" ", "+"))
-    // (input.to_string(), config.search_template.replace("%%QUERY%%", &input.replace(" ", "+")))
     let mut result: Option<(String, String, String)> = None;
     for prefix in &config.web_prefixes {
         if let Some(query) = input.strip_prefix(&prefix.1) {
@@ -48,7 +46,6 @@ fn math(input: &str) -> Option<f64> {
 }
 
 fn web(input: &str, config: &SprintConfig) -> (String, String) {
-    // config.search_template.replace("%%QUERY%%", &input.replace(" ", "+"))
     (input.to_string(), config.search_template.replace("%%QUERY%%", &input.replace(" ", "+")))
 }
 
