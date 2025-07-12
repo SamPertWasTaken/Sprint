@@ -105,7 +105,7 @@ impl CanvasRenderable for TextLabel {
                 let row = font_canvas.stride * y as usize;
                 let pixel_index = row + (font_canvas.format.bytes_per_pixel() as usize * x as usize);
                 let color = font_canvas.pixels[pixel_index];
-                if color == 0 {
+                if color < 60 {
                     continue;
                 }
                 canvas.set_pixel(final_x, final_y, Color::new_mono(color, 255));
