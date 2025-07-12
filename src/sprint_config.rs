@@ -1,10 +1,12 @@
-use std::{env, path::PathBuf};
+use std::{env, fs, io::Write, path::PathBuf};
 
 use config::{Config, File};
 use font_kit::{font::Font, source::SystemSource};
 use serde::Deserialize;
 
 use crate::render_canvas::Color;
+
+const DEFAULT_CONFIG_CONTENTS: &str = include_str!("../default-config.toml");
 
 #[derive(Debug, Deserialize)]
 struct SprintConfigRaw {
@@ -27,9 +29,19 @@ impl Default for SprintConfigRaw {
             selection_hover_color: (72, 43, 102),
             search_template: "https://duckduckgo.com/?q=%%QUERY%%".to_string(),
             web_prefixes: vec![
-                ("Youtube".to_string(), ">yt".to_string(), "https://www.youtube.com/results?search_query=%%QUERY%%".to_string()),
                 ("Wikipedia".to_string(), ">wiki".to_string(), "https://en.wikipedia.org/w/index.php?search=%%QUERY%%".to_string()),
-                ("Arch Wiki".to_string(), ">arwiki".to_string(), "https://wiki.archlinux.org/index.php?search=%%QUERY%%".to_string())
+                ("StackExchange".to_string(), ">sexch".to_string(), "https://stackexchange.com/search?q=%%QUERY%%".to_string()),
+                ("StackOverflow".to_string(), ">sover".to_string(), "https://stackoverflow.com/search?q=%%QUERY%%".to_string()),
+
+                ("YouTube".to_string(), ">yt".to_string(), "https://www.youtube.com/results?search_query=%%QUERY%%".to_string()),
+                ("GitHub".to_string(), ">gh".to_string(), "https://github.com/search?q=%%QUERY%%".to_string()),
+                ("LinkedIn".to_string(), ">lnkin".to_string(), "https://www.linkedin.com/search/results/all/?keywords=%%QUERY%%".to_string()),
+                ("Reddit".to_string(), ">reddit".to_string(), "https://www.reddit.com/search/?q=%%QUERY%%".to_string()),
+                ("Facebook".to_string(), ">facebook".to_string(), "https://www.facebook.com/search/top/?q=%%QUERY%%".to_string()),
+
+                ("Google".to_string(), ">google".to_string(), "https://www.google.com/search?q=%%QUERY%%".to_string()),
+                ("Bing".to_string(), ">bing".to_string(), "https://www.bing.com/search?q=%%QUERY%%".to_string()),
+                ("DuckDuckGo".to_string(), ">ddg".to_string(), "https://duckduckgo.com/?q=%%QUERY%%".to_string()),
             ],
             result_order: vec!["prefixes".to_string(), "math".to_string(), "desktop".to_string(), "search".to_string()]
         }
@@ -55,7 +67,10 @@ impl SprintConfigRaw {
             let path = PathBuf::from(config_home);
             if path.exists() {
                 return Some(path);
-            }
+            } 
+
+            Self::generate_default_config_file(path);
+            return None;
         }
         if let Ok(mut user_home) = env::var("HOME") {
             user_home.push_str("/.config/sprint.toml");
@@ -63,9 +78,22 @@ impl SprintConfigRaw {
             if path.exists() {
                 return Some(path);
             }
+
+            Self::generate_default_config_file(path);
+            return None;
         }
 
         None
+    }
+
+    fn generate_default_config_file(path: PathBuf) {
+        if path.exists() {
+            return;
+        }
+
+        let mut config_file = fs::File::create(&path).expect("Unable to create default config file.");
+        config_file.write_all(DEFAULT_CONFIG_CONTENTS.as_bytes()).expect("Unable to write to default config file.");
+        println!("Created default config file");
     }
 }
 

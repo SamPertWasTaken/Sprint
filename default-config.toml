@@ -1,0 +1,25 @@
+font = "FreeSans"
+background_color = [25, 25, 25]
+foreground_color = [30, 30, 30]
+seperator_color = [112, 69, 156]
+selection_hover_color = [72, 43, 102]
+search_template = "https://duckduckgo.com/?q=%%QUERY%%"
+web_prefixes = [
+    # Knowledge
+    ["Wikipedia", ">wiki", "https://en.wikipedia.org/w/index.php?search=%%QUERY%%"],
+    ["StackExchange", ">sexch", "https://stackexchange.com/search?q=%%QUERY%%"],
+    ["StackOverflow", ">sover", "https://stackoverflow.com/search?q=%%QUERY%%"],
+
+    # Social Media
+    ["YouTube", ">yt", "https://www.youtube.com/results?search_query=%%QUERY%%"],
+    ["GitHub", ">gh", "https://github.com/search?q=%%QUERY%%"],
+    ["LinkedIn", ">lnkin", "https://www.linkedin.com/search/results/all/?keywords=%%QUERY%%"],
+    ["Reddit", ">reddit", "https://www.reddit.com/search/?q=%%QUERY%%"],
+    ["Facebook", ">facebook", "https://www.facebook.com/search/top/?q=%%QUERY%%"],
+
+    # Search Engines
+    ["Google", ">google", "https://www.google.com/search?q=%%QUERY%%"],
+    ["Bing", ">bing", "https://www.bing.com/search?q=%%QUERY%%"],
+    ["DuckDuckGo", ">ddg", "https://duckduckgo.com/?q=%%QUERY%%"],
+]
+result_order = ["prefixes", "math", "desktop", "search"]
