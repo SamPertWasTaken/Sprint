@@ -1,4 +1,5 @@
 #![warn(clippy::pedantic)]
+#![warn(clippy::redundant_type_annotations)]
 
 use sprint_config::SprintConfig;
 

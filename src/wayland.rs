@@ -178,7 +178,7 @@ impl LayerState {
     }
 
     fn recreate_results_cache(&mut self) {
-        let time: Instant = Instant::now();
+        let time = Instant::now();
         let mut transform = Vector2I::new(16, 49);
         let standard_size = Vector2I::new(1024, HEIGHT_PER_ELEMENT);
         self.filter_results_cache = Vec::new();

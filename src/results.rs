@@ -33,7 +33,7 @@ impl SprintResults {
     }
 
     pub fn refresh_results(&mut self, input: &str, config: &SprintConfig) {
-        let time: Instant = Instant::now();
+        let time = Instant::now();
 
         self.prefix_results = Self::get_prefix_results(input, config);
         self.math_result = Self::get_math_result(input);

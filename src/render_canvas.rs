@@ -66,7 +66,7 @@ impl RenderCanvas {
             let x = u32::try_from(index % width_usize).expect("x to u32 failed");
             let y = u32::try_from(index / width_usize).expect("y to u32 failed");
 
-            let pixel_index: usize = self.index_from_pixel(x, y);
+            let pixel_index = self.index_from_pixel(x, y);
             let array: &mut [u8; 4] = chunk.try_into().unwrap();
             *array = self.pixels[pixel_index].get_wayland_color().to_le_bytes();
         });

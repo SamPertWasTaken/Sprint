@@ -38,8 +38,7 @@ impl TextLabel {
 
     pub fn find_cursor_length(&self, place: usize) -> u32 {
         let mut length: u32 = 0;
-        self.text[0..place]
-            .chars()
+        self.text[0..place].chars()
             .for_each(|char| length += u32::try_from(self.character_length_cache[&char].width()).expect("char width to u32 failed"));
         length
     }
@@ -55,7 +54,7 @@ impl TextLabel {
         self.character_length_cache = HashMap::new();
         let canvas = self.font_canvas.as_mut().unwrap();
 
-        let mut transform: Transform2F = Transform2F::from_translation(Vector2F::new(0.0, self.size.y() as f32 / 1.5));
+        let mut transform = Transform2F::from_translation(Vector2F::new(0.0, self.size.y() as f32 / 1.5));
         for char in self.text.chars() {
             if char.is_whitespace() {
                 // transform and move on 
