@@ -1,6 +1,5 @@
 use std::{cmp::min, time::Instant};
 
-use font_kit::source::SystemSource;
 use pathfinder_geometry::vector::Vector2I;
 use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_keyboard, delegate_layer, delegate_output, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{keyboard::{KeyboardHandler, Keysym}, Capability, SeatHandler, SeatState}, shell::{wlr_layer::{KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface}, WaylandSurface}, shm::{slot::SlotPool, Shm, ShmHandler}};
 use wayland_client::{globals::registry_queue_init, protocol::{wl_keyboard::WlKeyboard, wl_shm}, Connection, QueueHandle};
@@ -100,7 +99,7 @@ impl KeyboardHandler for LayerState {
             Keysym::Return => self.select(),
             Keysym::BackSpace => if let Some(new_filter) = self.filter_input.pop_at_cursor() { self.filter = new_filter }
             // Cursor movement
-            Keysym::Down => self.selected = min((self.filter_results_cache.len() - 1) as u8, self.selected + 1),
+            Keysym::Down => self.selected = min(u8::try_from(self.filter_results_cache.len() - 1).expect("filter results cache length to u8 failed"), self.selected + 1),
             Keysym::Up => self.selected = if self.selected > 0 { self.selected - 1 } else { 0 },
             Keysym::Right => self.filter_input.advance_cursor(),
             Keysym::Left => self.filter_input.reel_cursor(),
@@ -144,9 +143,11 @@ impl LayerState {
     pub fn draw(&mut self, qh: &QueueHandle<Self>) {
         let width = self.width;
         let height = self.height;
-        let stride = self.width as i32 * 4;
+        let width_int = i32::try_from(width).expect("selected height to i32 failed");
+        let height_int = i32::try_from(height).expect("height to i32 failed");
+        let stride = width_int * 4;
 
-        let (buffer, canvas) = self.pool.create_buffer(width as i32, height as i32, stride, wl_shm::Format::Argb8888).expect("Failed to create buffer on draw.");
+        let (buffer, canvas) = self.pool.create_buffer(width_int, height_int, stride, wl_shm::Format::Argb8888).expect("Failed to create buffer on draw.");
 
         self.canvas.wipe(self.config.background_color);
 
@@ -154,11 +155,11 @@ impl LayerState {
         self.canvas.draw_box(0, 0, 1024, 48, self.config.foreground_color);
         self.filter_input.draw(&mut self.canvas);
 
-        let selected_height = HEIGHT_PER_ELEMENT * self.selected as i32;
-        if !self.filter_results_cache.is_empty() {
-            self.canvas.draw_box(0, (49 + selected_height) as u32, 1024, HEIGHT_PER_ELEMENT as u32, self.config.selection_hover_color);
-        } else {
+        let selected_height = HEIGHT_PER_ELEMENT * i32::from(self.selected);
+        if self.filter_results_cache.is_empty() {
             self.no_results_label.draw(&mut self.canvas);
+        } else {
+            self.canvas.draw_box(0, 49 + u32::try_from(selected_height).expect("selected height to u32 failed"), 1024, HEIGHT_PER_ELEMENT as u32, self.config.selection_hover_color);
         }
         self.canvas.draw_box(0, 49, 1024, 1, self.config.seperator_color);
 
@@ -170,7 +171,7 @@ impl LayerState {
         // Push it to the surface
         self.canvas.fill_wayland_canvas(canvas);
 
-        self.layer.wl_surface().damage_buffer(0, 0, width as i32, height as i32);
+        self.layer.wl_surface().damage_buffer(0, 0, width_int, height_int);
         self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
         buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach to buffer");
         self.layer.commit();
@@ -215,11 +216,11 @@ impl LayerState {
                     transform.set_y(transform.y() + HEIGHT_PER_ELEMENT);
                     self.filter_results_cache.push(web_entry);
                 },
-                _ => { println!("Error: Unknown result type {}", result_type) }
+                _ => println!("Error: Unknown result type {result_type}")
             }
         }
 
-        println!("Time to recreate results element cache: {:?}", Instant::now() - time);
+        println!("Time to recreate results element cache: {:?}", time.elapsed());
     }
 
     fn select(&mut self) {
@@ -261,7 +262,6 @@ pub fn create_layer(config: SprintConfig) {
     let pool = SlotPool::new((width * height * 4) as usize, &shm).expect("Failed to create pool");
 
     // state
-    let font_source = SystemSource::new();
     let mut state = LayerState {
         registry_state: RegistryState::new(&globals),
         seat_state: SeatState::new(&globals, &qh),
@@ -280,9 +280,9 @@ pub fn create_layer(config: SprintConfig) {
         filter_results: SprintResults::new(),
         selected: 0,
 
-        filter_input: InputBox::new("", "Search...", Vector2I::new(16, 8), Vector2I::new(996, 32), config.font.clone()),
+        filter_input: InputBox::new("", "Search...", Vector2I::new(16, 8), Vector2I::new(996, 32), &config.font),
         filter_results_cache: Vec::new(),
-        no_results_label: TextLabel::new("¯\\_(._.)_/¯", config.font.clone(), 18.0, Vector2I::new(462, 240), Vector2I::new(100, 32)).expect("Unable to create no results label."),
+        no_results_label: TextLabel::new("¯\\_(._.)_/¯", config.font.clone(), 18.0, Vector2I::new(462, 240), Vector2I::new(100, 32)),
         config
     };
     state.filter_results.refresh_results("", &state.config);

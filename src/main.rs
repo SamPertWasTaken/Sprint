@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use sprint_config::SprintConfig;
 
 mod entry_box;
@@ -10,6 +12,5 @@ mod wayland;
 
 fn main() {
     let config = SprintConfig::load();
-    println!("{config:?}");
     wayland::create_layer(config);
 }

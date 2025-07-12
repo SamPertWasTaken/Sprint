@@ -23,8 +23,8 @@ impl Color {
         Self::new(tuple.0, tuple.1, tuple.2, a)
     }
 
-    pub fn get_wayland_color(&self) -> i32 {
-        ((self.a as i32) << 24) + ((self.r as i32) << 16) + ((self.g as i32) << 8) + (self.b as i32)
+    pub fn get_wayland_color(self) -> i32 {
+        (i32::from(self.a) << 24) + (i32::from(self.r) << 16) + (i32::from(self.g) << 8) + i32::from(self.b)
     }
 }
 
@@ -62,8 +62,9 @@ impl RenderCanvas {
 
     pub fn fill_wayland_canvas(&self, canvas: &mut [u8]) {
         canvas.chunks_exact_mut(4).enumerate().for_each(|(index, chunk)| {
-            let x = (index % self.width as usize) as u32;
-            let y = (index / self.width as usize) as u32;
+            let width_usize = usize::try_from(self.width).expect("width to usize failed");
+            let x = u32::try_from(index % width_usize).expect("x to u32 failed");
+            let y = u32::try_from(index / width_usize).expect("y to u32 failed");
 
             let pixel_index: usize = self.index_from_pixel(x, y);
             let array: &mut [u8; 4] = chunk.try_into().unwrap();

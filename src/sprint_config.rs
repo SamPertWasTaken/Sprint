@@ -1,4 +1,4 @@
-use std::{env, fs, io::Write, path::PathBuf};
+use std::{env, fs, io::Write, path::{Path, PathBuf}};
 
 use config::{Config, File};
 use font_kit::{font::Font, source::SystemSource};
@@ -69,7 +69,7 @@ impl SprintConfigRaw {
                 return Some(path);
             } 
 
-            Self::generate_default_config_file(path);
+            Self::generate_default_config_file(&path);
             return None;
         }
         if let Ok(mut user_home) = env::var("HOME") {
@@ -79,19 +79,19 @@ impl SprintConfigRaw {
                 return Some(path);
             }
 
-            Self::generate_default_config_file(path);
+            Self::generate_default_config_file(&path);
             return None;
         }
 
         None
     }
 
-    fn generate_default_config_file(path: PathBuf) {
+    fn generate_default_config_file(path: &Path) {
         if path.exists() {
             return;
         }
 
-        let mut config_file = fs::File::create(&path).expect("Unable to create default config file.");
+        let mut config_file = fs::File::create(path).expect("Unable to create default config file.");
         config_file.write_all(DEFAULT_CONFIG_CONTENTS.as_bytes()).expect("Unable to write to default config file.");
         println!("Created default config file");
     }
@@ -99,7 +99,6 @@ impl SprintConfigRaw {
 
 #[derive(Clone, Debug)]
 pub struct SprintConfig {
-    raw: SprintConfigRaw,
     // TODO: Currently fonts have to be cloned due to it not impling copy, is there a way around
     // this? Got close with Cow's but tainting every struct with a lifetime seems
     // counter-productive
@@ -128,10 +127,8 @@ impl SprintConfig {
             seperator_color: Color::from_tuple(raw_config.seperator_color, 255),
             selection_hover_color: Color::from_tuple(raw_config.selection_hover_color, 255),
             search_template: raw_config.search_template.to_string(),
-            web_prefixes: raw_config.web_prefixes.clone(),
-            result_order: raw_config.result_order.clone(),
-
-            raw: raw_config
+            web_prefixes: raw_config.web_prefixes,
+            result_order: raw_config.result_order
         }
     }
 }

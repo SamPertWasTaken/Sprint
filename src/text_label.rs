@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use font_kit::{canvas::{Canvas, Format, RasterizationOptions}, font::Font, hinting::HintingOptions, source::SystemSource};
+use font_kit::{canvas::{Canvas, Format, RasterizationOptions}, font::Font, hinting::HintingOptions};
 use pathfinder_geometry::{rect::RectI, transform2d::Transform2F, vector::{Vector2F, Vector2I}};
 
 use crate::render_canvas::{CanvasRenderable, Color};
@@ -18,8 +18,8 @@ pub struct TextLabel {
 }
 
 impl TextLabel {
-    pub fn new(text: &str, font: Font, font_size: f32, position: Vector2I, size: Vector2I) -> Option<Self> {
-        Some(Self {
+    pub fn new(text: &str, font: Font, font_size: f32, position: Vector2I, size: Vector2I) -> Self {
+        Self {
             position,
             size,
             font_canvas: None,
@@ -28,7 +28,7 @@ impl TextLabel {
             font,
             font_size,
             character_length_cache: HashMap::new()
-        })
+        }
     }
     
     pub fn set_text(&mut self, text: &str) {
@@ -40,10 +40,11 @@ impl TextLabel {
         let mut length: u32 = 0;
         self.text[0..place]
             .chars()
-            .for_each(|char| length += self.character_length_cache[&char].width() as u32);
+            .for_each(|char| length += u32::try_from(self.character_length_cache[&char].width()).expect("char width to u32 failed"));
         length
     }
 
+    #[allow(clippy::cast_precision_loss)]
     fn rasterize_to_font_canvas(&mut self) {
         if !self.requires_rerender {
             return;
@@ -79,16 +80,6 @@ impl TextLabel {
         }
         self.requires_rerender = false;
     }
-
-    fn find_font(source: &SystemSource, postscript_name: &str) -> Option<Font> {
-        if let Ok(font) = source.select_by_postscript_name(postscript_name) {
-            match font.load() {
-                Ok(r) => return Some(r),
-                Err(_) => return None,
-            }
-        }
-        None
-    }
 }
 impl CanvasRenderable for TextLabel {
     fn draw(&mut self, canvas: &mut crate::render_canvas::RenderCanvas) {
@@ -101,11 +92,11 @@ impl CanvasRenderable for TextLabel {
         let font_canvas = self.font_canvas.as_ref().unwrap();
         for y in 0..self.size.y() {
             for x in 0..self.size.x() {
-                let final_x: u32 = (x + self.position.x()) as u32;
-                let final_y = (y + self.position.y()) as u32;
+                let final_x: u32 = u32::try_from(x + self.position.x()).expect("failed to make final x to u32");
+                let final_y: u32 = u32::try_from(y + self.position.y()).expect("failed to make final x to u32");
 
-                let row = font_canvas.stride * y as usize;
-                let pixel_index = row + (font_canvas.format.bytes_per_pixel() as usize * x as usize);
+                let row = font_canvas.stride * usize::try_from(y).expect("y to usize failed");
+                let pixel_index = row + (font_canvas.format.bytes_per_pixel() as usize * usize::try_from(x).expect("x to usize failed"));
                 let color = font_canvas.pixels[pixel_index];
                 if color < 60 {
                     continue;

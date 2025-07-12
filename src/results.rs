@@ -1,8 +1,3 @@
-//! This module is responsible for the actual searching and calculating of the results.
-//! Currently it will use the following;
-//! - FreeDesktop .desktop entry files
-//! - Calculations
-
 use std::time::Instant;
 use freedesktop_desktop_entry::{current_desktop, default_paths, get_languages_from_env, DesktopEntry, Iter};
 
@@ -27,7 +22,7 @@ impl SprintResults {
             prefix_results: None,
             math_result: None,
             desktop_results: Vec::new(),
-            web_result: ("".to_string(), "".to_string()),
+            web_result: (String::new(), String::new()),
 
             desktop_file_cache: Iter::new(default_paths())
                 .entries(Some(&locales))
@@ -45,7 +40,7 @@ impl SprintResults {
         self.desktop_results = Self::get_desktop_entries(input, &self.desktop_file_cache, &self.desktop_locale_cache, &self.current_desktop);
         self.web_result = Self::get_web_result(input, config);
 
-        println!("Results search time for '{input}': {:?}", Instant::now() - time);
+        println!("Results search time for '{input}': {:?}", time.elapsed());
     }
 
     fn get_prefix_results(input: &str, config: &SprintConfig) -> Option<(String, String, String)> {
@@ -58,7 +53,7 @@ impl SprintResults {
                 }
                 let mut prefix = prefix.clone();
                 prefix.1 = query.trim().to_string();
-                prefix.2 = prefix.2.replace("%%QUERY%%", &query.trim().replace(" ", "+"));
+                prefix.2 = prefix.2.replace("%%QUERY%%", &query.trim().replace(' ', "+"));
                 result = Some(prefix.clone());
             }
         }
@@ -74,20 +69,21 @@ impl SprintResults {
     }
 
     fn get_web_result(input: &str, config: &SprintConfig) -> (String, String) {
-        (input.to_string(), config.search_template.replace("%%QUERY%%", &input.replace(" ", "+")))
+        (input.to_string(), config.search_template.replace("%%QUERY%%", &input.replace(' ', "+")))
     }
 
-    fn get_desktop_entries(input: &str, desktop_files: &Vec<DesktopEntry>, desktop_locales: &Vec<String>, current_desktop: &Option<Vec<String>>) -> Vec<DesktopEntry> {
+    #[allow(clippy::ref_option)]
+    fn get_desktop_entries(input: &str, desktop_files: &[DesktopEntry], desktop_locales: &[String], current_desktop: &Option<Vec<String>>) -> Vec<DesktopEntry> {
         let mut entries = desktop_files.iter()
             // Name
-            .filter(|entry| entry.full_name(&desktop_locales).unwrap().to_lowercase().contains(&input.to_lowercase()))
+            .filter(|entry| entry.full_name(desktop_locales).unwrap().to_lowercase().contains(&input.to_lowercase()))
             // Is it hidden?
             .filter(|entry| !entry.no_display())
             // Only show in these desktops
             .filter(|entry| {
                 if let Some(current_desktop) = &current_desktop {
                     if let Some(show_in) = entry.only_show_in() {
-                        return show_in.iter().any(|x| current_desktop.contains(&x.to_string()));
+                        return show_in.iter().any(|x| current_desktop.contains(&(*x).to_string()));
                     }
                     return true;
                 }
@@ -97,17 +93,17 @@ impl SprintResults {
             .filter(|entry| {
                 if let Some(current_desktop) = &current_desktop {
                     if let Some(no_show_in) = entry.not_show_in() {
-                        return !no_show_in.iter().any(|x| current_desktop.contains(&x.to_string()));
+                        return !no_show_in.iter().any(|x| current_desktop.contains(&(*x).to_string()));
                     }
                     return true;
                 }
                 true
             })
             // TODO: there are a million better ways to do this...
-            .map(|x| x.to_owned())
+            .map(ToOwned::to_owned)
             .collect::<Vec<_>>();
 
-        entries.sort_unstable_by_key(|item| item.full_name(&desktop_locales).expect("Failed to fetch app name from locale.").to_string());
+        entries.sort_unstable_by_key(|item| item.full_name(desktop_locales).expect("Failed to fetch app name from locale.").to_string());
         entries
     }
 }

@@ -15,6 +15,7 @@ pub enum EntryBoxValue {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Entrybox {
     value: EntryBoxValue,
     position: Vector2I,
@@ -35,7 +36,7 @@ impl Entrybox {
             value,
             position,
             size,
-            label: TextLabel::new(&label, font, 16.0, position, size).expect("Failed to make text label.")
+            label: TextLabel::new(&label, font, 16.0, position, size)
         }
     }
 
@@ -59,8 +60,7 @@ impl Entrybox {
                     .expect("Unable to launch process");
             },
             EntryBoxValue::Math(_) => {},
-            EntryBoxValue::WebSearch(_, url) => webbrowser::open(url).expect("Failed to launch url on web browser."),
-            EntryBoxValue::WebPrefix(_, _, url) => webbrowser::open(url).expect("Failed to launch url on web browser."),
+            EntryBoxValue::WebSearch(_, url) | EntryBoxValue::WebPrefix(_, _, url) => webbrowser::open(url).expect("Failed to launch url on web browser."),
         }
     }
 }
