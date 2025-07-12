@@ -30,8 +30,8 @@ impl Default for SprintConfigRaw {
             search_template: "https://duckduckgo.com/?q=%%QUERY%%".to_string(),
             web_prefixes: vec![
                 ("Wikipedia".to_string(), ">wiki".to_string(), "https://en.wikipedia.org/w/index.php?search=%%QUERY%%".to_string()),
-                ("StackExchange".to_string(), ">sexch".to_string(), "https://stackexchange.com/search?q=%%QUERY%%".to_string()),
-                ("StackOverflow".to_string(), ">sover".to_string(), "https://stackoverflow.com/search?q=%%QUERY%%".to_string()),
+                ("StackExchange".to_string(), ">exchange".to_string(), "https://stackexchange.com/search?q=%%QUERY%%".to_string()),
+                ("StackOverflow".to_string(), ">overflow".to_string(), "https://stackoverflow.com/search?q=%%QUERY%%".to_string()),
 
                 ("YouTube".to_string(), ">yt".to_string(), "https://www.youtube.com/results?search_query=%%QUERY%%".to_string()),
                 ("GitHub".to_string(), ">gh".to_string(), "https://github.com/search?q=%%QUERY%%".to_string()),

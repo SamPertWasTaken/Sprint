@@ -7,8 +7,8 @@ search_template = "https://duckduckgo.com/?q=%%QUERY%%"
 web_prefixes = [
     # Knowledge
     ["Wikipedia", ">wiki", "https://en.wikipedia.org/w/index.php?search=%%QUERY%%"],
-    ["StackExchange", ">sexch", "https://stackexchange.com/search?q=%%QUERY%%"],
-    ["StackOverflow", ">sover", "https://stackoverflow.com/search?q=%%QUERY%%"],
+    ["StackExchange", ">exchange", "https://stackexchange.com/search?q=%%QUERY%%"],
+    ["StackOverflow", ">overflow", "https://stackoverflow.com/search?q=%%QUERY%%"],
 
     # Social Media
     ["YouTube", ">yt", "https://www.youtube.com/results?search_query=%%QUERY%%"],
