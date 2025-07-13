@@ -1,7 +1,7 @@
 # The font that Sprint will use throughout.
 font = "FreeSans"
 
-# The colors that Sprint should use.
+# The colors that Sprint should use, in [R, G, B] format.
 background_color = [25, 25, 25]
 foreground_color = [30, 30, 30]
 seperator_color = [112, 69, 156]
