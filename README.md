@@ -4,7 +4,8 @@ A featureful wayland search tool for Linux, letting you open applications, do si
 ![A preview GIF of Sprint working](https://i.imgur.com/I0tY8LC.gif)
 
 ## Installing
-To install, simply clone the repo and install via `cargo install --path .`
+To install, simply clone the repo and install via `cargo install --path .`.  
+Ensure that `~/.cargo/bin` is included in your `$PATH`.
 
 ## Usage
 Just invoke the `sprint` binary by setting it as a keybind in your window manager. For example with Hyprland;
