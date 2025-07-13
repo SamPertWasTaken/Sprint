@@ -1,1 +1,17 @@
 # Sprint
+A featureful search tool for Linux, letting you open applications, do simple calculations and quickly search the web.
+
+![A preview GIF of Sprint working](https://i.imgur.com/I0tY8LC.gif)
+
+## Installing
+TBD
+
+## Usage
+Just invoke the `sprint` binary by setting it as a keybind in your window manager. For example with Hyprland;
+```
+bind = SUPER, R, exec, ~/.cargo/bin/sprint
+```
+
+## Configuration
+Sprint will always ensure a config file exists, either in `$XDG_CONFIG_HOME/sprint.toml` or `$HOME/.config/sprint.toml` if `XDG_CONFIG_HOME` is not set.  
+The comments inside the config file should keep you right as you modify it.

@@ -1,9 +1,16 @@
+# The font that Sprint will use throughout.
 font = "FreeSans"
+
+# The colors that Sprint should use.
 background_color = [25, 25, 25]
 foreground_color = [30, 30, 30]
 seperator_color = [112, 69, 156]
 selection_hover_color = [72, 43, 102]
+
+# The template for generic web searches
+# The variable %%QUERY%% is where the query is inserted into the URL, formatted as a GET parameter with spaces replaced with +
 search_template = "https://duckduckgo.com/?q=%%QUERY%%"
+# All web prefixes - The %%QUERY%% variable works as above.
 web_prefixes = [
     # Knowledge
     ["Wikipedia", ">wiki", "https://en.wikipedia.org/w/index.php?search=%%QUERY%%"],
@@ -22,4 +29,6 @@ web_prefixes = [
     ["Bing", ">bing", "https://www.bing.com/search?q=%%QUERY%%"],
     ["DuckDuckGo", ">ddg", "https://duckduckgo.com/?q=%%QUERY%%"],
 ]
+
+# The order of the results, each entry should be one of the following; prefixes, math, desktop, search
 result_order = ["prefixes", "math", "desktop", "search"]
