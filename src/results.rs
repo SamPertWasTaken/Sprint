@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::{collections::HashMap, time::Instant};
 use freedesktop_desktop_entry::{current_desktop, default_paths, get_languages_from_env, DesktopEntry, Iter};
 
 use crate::sprint_config::SprintConfig;
@@ -74,7 +74,8 @@ impl SprintResults {
 
     #[allow(clippy::ref_option)]
     fn get_desktop_entries(input: &str, desktop_files: &[DesktopEntry], desktop_locales: &[String], current_desktop: &Option<Vec<String>>) -> Vec<DesktopEntry> {
-        let mut entries = desktop_files.iter()
+        let mut entries = HashMap::new();
+        desktop_files.iter()
             // Name
             .filter(|entry| entry.full_name(desktop_locales).unwrap().to_lowercase().contains(&input.to_lowercase()))
             // Is it hidden?
@@ -99,11 +100,15 @@ impl SprintResults {
                 }
                 true
             })
-            // TODO: there are a million better ways to do this...
-            .map(ToOwned::to_owned)
-            .collect::<Vec<_>>();
+            .for_each(|x| {
+                if entries.contains_key(x.id()) {
+                    return;
+                }
+                entries.insert(x.id(), x.to_owned());
+            });
 
-        entries.sort_unstable_by_key(|item| item.full_name(desktop_locales).expect("Failed to fetch app name from locale.").to_string());
-        entries
+        let mut entries_vec = entries.values().cloned().collect::<Vec<_>>();
+        entries_vec.sort_unstable_by_key(|item| item.full_name(desktop_locales).expect("Failed to fetch app name from locale.").to_string());
+        entries_vec
     }
 }

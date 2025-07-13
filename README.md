@@ -1,7 +1,7 @@
 # Sprint
 A featureful wayland search tool for Linux, letting you open applications, do simple calculations and quickly search the web.
 
-![A preview GIF of Sprint working](https://i.imgur.com/I0tY8LC.gif)
+![A preview GIF of Sprint working](https://i.imgur.com/pXx97E4.gif)
 
 ## Installing
 To install, simply clone the repo and install via `cargo install --path .`.  
