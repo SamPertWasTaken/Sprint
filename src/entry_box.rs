@@ -49,7 +49,7 @@ impl Entrybox {
                 let command: String = exec.split_whitespace()
                     .filter(|x| !x.starts_with('%'))
                     .collect::<Vec<&str>>()
-                    .concat();
+                    .join(" ");
 
                 #[allow(clippy::zombie_processes)]
                 Command::new("sh")
