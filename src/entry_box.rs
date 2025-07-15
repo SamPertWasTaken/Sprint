@@ -50,7 +50,7 @@ impl Entrybox {
                     .filter(|x| !x.starts_with('%'))
                     .collect::<Vec<&str>>()
                     .join(" ");
-                println!(" parsed to {command}");
+                println!("parsed to {command}");
 
                 #[allow(clippy::zombie_processes)]
                 Command::new("sh")
