@@ -1,4 +1,4 @@
-use std::{cmp::min, time::Instant};
+use std::{cmp::{max, min}, time::Instant};
 
 use pathfinder_geometry::vector::Vector2I;
 use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_keyboard, delegate_layer, delegate_output, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{keyboard::{KeyboardHandler, Keysym}, Capability, SeatHandler, SeatState}, shell::{wlr_layer::{KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface}, WaylandSurface}, shm::{slot::SlotPool, Shm, ShmHandler}};
@@ -100,7 +100,7 @@ impl KeyboardHandler for LayerState {
             Keysym::BackSpace => if let Some(new_filter) = self.filter_input.pop_at_cursor() { self.filter = new_filter }
             // Cursor movement
             Keysym::Down => self.selected = min(u8::try_from(self.filter_results_cache.len() - 1).expect("filter results cache length to u8 failed"), self.selected + 1),
-            Keysym::Up => self.selected = if self.selected > 0 { self.selected - 1 } else { 0 },
+            Keysym::Up => self.selected = max(self.selected - 1, 0),
             Keysym::Right => self.filter_input.advance_cursor(),
             Keysym::Left => self.filter_input.reel_cursor(),
             Keysym::Home => self.filter_input.set_cursor_to_home(),
