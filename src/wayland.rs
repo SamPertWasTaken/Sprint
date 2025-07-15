@@ -250,8 +250,7 @@ impl LayerState {
             
             _ => {
                 if let Some(character) = keysym.key_char() {
-                    let new_filter = self.filter_input.push_at_cursor(character);
-                    self.filter = new_filter;
+                    self.filter = self.filter_input.push_at_cursor(character);
                 }
             }
         }
