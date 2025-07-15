@@ -1,10 +1,14 @@
-use std::{cmp::{max, min}, time::Instant};
+use std::{cmp::{max, min}, num::NonZeroU32, time::Instant};
 
 use pathfinder_geometry::vector::Vector2I;
-use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_keyboard, delegate_layer, delegate_output, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{keyboard::{KeyboardHandler, Keysym}, Capability, SeatHandler, SeatState}, shell::{wlr_layer::{KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface}, WaylandSurface}, shm::{slot::SlotPool, Shm, ShmHandler}};
+use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_keyboard, delegate_layer, delegate_output, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{keyboard::{KeyboardHandler, Keysym, RepeatInfo}, Capability, SeatHandler, SeatState}, shell::{wlr_layer::{KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface}, WaylandSurface}, shm::{slot::SlotPool, Shm, ShmHandler}};
 use wayland_client::{globals::registry_queue_init, protocol::{wl_keyboard::WlKeyboard, wl_shm}, Connection, QueueHandle};
 
 use crate::{entry_box::{EntryBoxValue, Entrybox}, input_box::InputBox, render_canvas::{CanvasRenderable, Color, RenderCanvas}, results::SprintResults, sprint_config::SprintConfig, text_label::TextLabel};
+
+// the key to repeat -> the time it was pressed/last repeated -> if it is already repeating or
+// is waiting for delay
+struct RepeatKeyInfo(Keysym, Instant, bool);
 
 struct LayerState {
     registry_state: RegistryState,
@@ -19,6 +23,9 @@ struct LayerState {
     layer: LayerSurface,
     keyboard: Option<WlKeyboard>,
     canvas: RenderCanvas,
+    repeat_key: Option<RepeatKeyInfo>,
+    repeat_delay: Option<u32>,
+    repeat_rate: Option<NonZeroU32>,
 
     // App Data
     config: SprintConfig,
@@ -93,35 +100,35 @@ impl SeatHandler for LayerState {
 
 impl KeyboardHandler for LayerState {
     fn press_key(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _serial: u32, event: smithay_client_toolkit::seat::keyboard::KeyEvent) {
-        match event.keysym {
-            // Control characters
-            Keysym::Escape => self.close = true,
-            Keysym::Return => self.select(),
-            Keysym::BackSpace => if let Some(new_filter) = self.filter_input.pop_at_cursor() { self.filter = new_filter }
-            // Cursor movement
-            Keysym::Down => self.selected = min(u8::try_from(self.filter_results_cache.len() - 1).expect("filter results cache length to u8 failed"), self.selected + 1),
-            Keysym::Up => self.selected = max(self.selected - 1, 0),
-            Keysym::Right => self.filter_input.advance_cursor(),
-            Keysym::Left => self.filter_input.reel_cursor(),
-            Keysym::Home => self.filter_input.set_cursor_to_home(),
-            Keysym::End => self.filter_input.set_cursor_to_end(),
-            
-            _ => {
-                if let Some(character) = event.keysym.key_char() {
-                    let new_filter = self.filter_input.push_at_cursor(character);
-                    self.filter = new_filter;
-                }
+        if self.repeat_delay.is_some() {
+            self.repeat_key = Some(RepeatKeyInfo(event.keysym, Instant::now(), false));
+        }
+        self.key_press_handle(event.keysym);
+    }
+
+    fn update_repeat_info(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, info: RepeatInfo) {
+        match info {
+            RepeatInfo::Repeat { rate, delay } => {
+                self.repeat_rate = Some(rate);
+                self.repeat_delay = Some(delay);
+            },
+            RepeatInfo::Disable => {
+                self.repeat_rate = None;
+                self.repeat_delay = None;
+            },
+        }
+    }
+    fn release_key(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _serial: u32, event: smithay_client_toolkit::seat::keyboard::KeyEvent) {
+        if let Some(RepeatKeyInfo(key, _, _)) = self.repeat_key {
+            if event.keysym == key {
+                self.repeat_key = None;
             }
         }
-        // re-do results 
-        self.filter_results.refresh_results(&self.filter, &self.config);
-        self.recreate_results_cache();
     }
 
     fn update_modifiers(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _serial: u32, _modifiers: smithay_client_toolkit::seat::keyboard::Modifiers, _layout: u32) {}
     fn enter(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _surface: &wayland_client::protocol::wl_surface::WlSurface, _serial: u32, _raw: &[u32], _keysyms: &[smithay_client_toolkit::seat::keyboard::Keysym]) {}
     fn leave(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _surface: &wayland_client::protocol::wl_surface::WlSurface, _serial: u32) {}
-    fn release_key(&mut self, _conn: &wayland_client::Connection, _qh: &QueueHandle<Self>, _keyboard: &wayland_client::protocol::wl_keyboard::WlKeyboard, _serial: u32, _event: smithay_client_toolkit::seat::keyboard::KeyEvent) {}
 }
 
 impl ShmHandler for LayerState {
@@ -226,6 +233,32 @@ impl LayerState {
         selected.select();
         self.close = true;
     }
+
+    fn key_press_handle(&mut self, keysym: Keysym) {
+        match keysym {
+            // Control characters
+            Keysym::Escape => self.close = true,
+            Keysym::Return => self.select(),
+            Keysym::BackSpace => if let Some(new_filter) = self.filter_input.pop_at_cursor() { self.filter = new_filter }
+            // Cursor movement
+            Keysym::Down => self.selected = min(u8::try_from(self.filter_results_cache.len() - 1).expect("filter results cache length to u8 failed"), self.selected + 1),
+            Keysym::Up => self.selected = max(self.selected - 1, 0),
+            Keysym::Right => self.filter_input.advance_cursor(),
+            Keysym::Left => self.filter_input.reel_cursor(),
+            Keysym::Home => self.filter_input.set_cursor_to_home(),
+            Keysym::End => self.filter_input.set_cursor_to_end(),
+            
+            _ => {
+                if let Some(character) = keysym.key_char() {
+                    let new_filter = self.filter_input.push_at_cursor(character);
+                    self.filter = new_filter;
+                }
+            }
+        }
+        // re-do results 
+        self.filter_results.refresh_results(&self.filter, &self.config);
+        self.recreate_results_cache();
+    }
 }
 
 const HEIGHT_PER_ELEMENT: i32 = 30;
@@ -273,6 +306,9 @@ pub fn create_layer(config: SprintConfig) {
         canvas: RenderCanvas::new(width, height),
         width,
         height,
+        repeat_key: None,
+        repeat_delay: None,
+        repeat_rate: None,
 
         filter: String::new(),
         filter_results: SprintResults::new(),
@@ -289,6 +325,36 @@ pub fn create_layer(config: SprintConfig) {
 
     // event loop
     loop {
+        // key repetition
+        // this var holds the key to repeat, just gets around the double mut borrow problem
+        let mut key_repeat = None;
+        // if we're holding down a key...
+        if let Some(RepeatKeyInfo(key, ref mut time, ref mut active)) = state.repeat_key {
+            let repeat_delay = state.repeat_delay.expect("repeat delay is set to none");
+            let repeat_rate = state.repeat_rate.expect("repeat rate is set to none");
+            // is the delay past yet?
+            if !*active && time.elapsed().as_millis() > repeat_delay.into() {
+                // if so, press the key and setup the repeatition
+                *active = true;
+                *time = Instant::now();
+                key_repeat = Some(key);
+            }
+
+            // the actual repeptition once its active
+            if *active {
+                let char_rate = 1000 / repeat_rate;
+                if time.elapsed().as_millis() > char_rate.into() {
+                    *time = Instant::now();
+                    key_repeat = Some(key);
+                }
+            }
+        }
+        // press it if needed
+        if let Some(repeat) = key_repeat {
+            state.key_press_handle(repeat);
+        }
+
+        // now back to boring wayland handling
         event_queue.blocking_dispatch(&mut state).unwrap();
 
         if state.close {
