@@ -10,7 +10,7 @@ font-kit = { version = "0.14.3", features = ["freetype"] }
 freedesktop-desktop-entry = "0.7.13"
 meval = "0.2.0"
 pathfinder_geometry = "0.5.1"
-serde = "1.0.219"
+serde = { version = "1.0.219", features = ["derive"] }
 smithay-client-toolkit = "0.19.2"
 wayland-client = "0.31.10"
 webbrowser = { version = "1.0.5", features = ["hardened"] }
