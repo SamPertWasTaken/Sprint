@@ -1,4 +1,4 @@
-use std::{cmp::{max, min}, num::NonZeroU32, time::Instant};
+use std::{cmp::min, num::NonZeroU32, time::Instant};
 
 use pathfinder_geometry::vector::Vector2I;
 use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_keyboard, delegate_layer, delegate_output, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{keyboard::{KeyboardHandler, Keysym, RepeatInfo}, Capability, SeatHandler, SeatState}, shell::{wlr_layer::{KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface}, WaylandSurface}, shm::{slot::SlotPool, Shm, ShmHandler}};
