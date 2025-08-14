@@ -242,7 +242,7 @@ impl LayerState {
             Keysym::BackSpace => if let Some(new_filter) = self.filter_input.pop_at_cursor() { self.filter = new_filter }
             // Cursor movement
             Keysym::Down => self.selected = min(u8::try_from(self.filter_results_cache.len() - 1).expect("filter results cache length to u8 failed"), self.selected + 1),
-            Keysym::Up => self.selected = max(self.selected - 1, 0),
+            Keysym::Up => self.selected = if self.selected != 0 { self.selected - 1} else { 0 },
             Keysym::Right => self.filter_input.advance_cursor(),
             Keysym::Left => self.filter_input.reel_cursor(),
             Keysym::Home => self.filter_input.set_cursor_to_home(),
